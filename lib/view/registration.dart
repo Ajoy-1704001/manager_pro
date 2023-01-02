@@ -1,36 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:get/get.dart';
-import 'package:get/utils.dart';
+import 'package:get/instance_manager.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:managerpro/controller/user_controller.dart';
 import 'package:managerpro/utilities/layout.dart';
 import 'package:managerpro/utilities/theme_helper.dart';
-import 'package:managerpro/view/registration.dart';
 import 'package:managerpro/widget/large_button.dart';
 import 'package:managerpro/widget/overlay_loader.dart';
 
-class Login extends StatefulWidget {
-  const Login({super.key});
+class Registration extends StatefulWidget {
+  const Registration({super.key});
 
   @override
-  State<Login> createState() => _LoginState();
+  State<Registration> createState() => _RegistrationState();
 }
 
-class _LoginState extends State<Login> {
-  late String email, password;
-  GlobalKey<FormState> formKey = GlobalKey<FormState>();
-  late OverlayEntry loader;
+class _RegistrationState extends State<Registration> {
+  GlobalKey<FormState> formKey = GlobalKey();
+  late String username, email, password;
   UserController userController = Get.put(UserController());
-
+  late OverlayEntry loader;
   @override
   void initState() {
     super.initState();
     loader = Loader.overlayLoader(context);
     final box = GetStorage();
-    box.write("oldUser", 1);
+    box.write("oldUser", 0);
   }
 
   @override
@@ -39,7 +34,7 @@ class _LoginState extends State<Login> {
       appBar: AppBar(
         elevation: 0,
         title: Text(
-          "Sign In",
+          "Sign Up",
           style: TextStyle(color: ThemeHelper.textColor),
         ),
       ),
@@ -59,7 +54,7 @@ class _LoginState extends State<Login> {
               ),
             ),
             const Text(
-              "Welcome Back",
+              "Create Account",
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w700,
@@ -71,21 +66,35 @@ class _LoginState extends State<Login> {
             SizedBox(
               width: MediaQuery.of(context).size.width * 0.7,
               child: Text(
-                "Please Enter your email address and password for Login",
+                "Please enter your information and create your account",
                 style: TextStyle(color: ThemeHelper.secondary),
               ),
             ),
-            const SizedBox(
-              height: 40,
+            SizedBox(
+              height: Get.height * 0.03,
             ),
             Form(
                 key: formKey,
                 child: Column(
                   children: [
                     TextFormField(
-                      validator: (value) => !GetUtils.isEmail(value!)
-                          ? "Please enter a valid email"
-                          : null,
+                      validator: (value) =>
+                          value == "" ? "Please enter your name" : null,
+                      onSaved: (newValue) => username = newValue!,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w600, fontSize: 18),
+                      decoration: const InputDecoration(
+                        hintText: "Enter your name",
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    TextFormField(
+                      validator: (value) =>
+                          value == "" || !(value!.contains('@'))
+                              ? "Please enter a valid email"
+                              : null,
                       onSaved: (newValue) => email = newValue!.trim(),
                       style: const TextStyle(
                           fontWeight: FontWeight.w600, fontSize: 18),
@@ -109,17 +118,6 @@ class _LoginState extends State<Login> {
                     )
                   ],
                 )),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                  onPressed: () {},
-                  child: Text(
-                    "Forgot Password?",
-                    style: TextStyle(
-                        color: ThemeHelper.textColor,
-                        fontWeight: FontWeight.w600),
-                  )),
-            ),
             SizedBox(
               height: MediaQuery.of(context).size.height * 0.03,
             ),
@@ -128,11 +126,15 @@ class _LoginState extends State<Login> {
                   if (formKey.currentState!.validate()) {
                     Overlay.of(context)!.insert(loader);
                     formKey.currentState!.save();
-                    await userController.userLoginByEmail(email, password);
+                    // print(username);
+                    // print(email);
+                    // print(password);
+                    await userController.createAccount(
+                        email, password, username);
                     loader.remove();
                   }
                 },
-                label: "Sign In"),
+                label: "Sign Up"),
             const SizedBox(
               height: 25,
             ),
@@ -167,9 +169,7 @@ class _LoginState extends State<Login> {
                   width: 20,
                 ),
                 InkWell(
-                  onTap: () async {
-                    await userController.userLoginByGoogle();
-                  },
+                  onTap: ()async {await userController.userLoginByGoogle();},
                   child: Container(
                     width: 70,
                     height: 70,
@@ -192,18 +192,13 @@ class _LoginState extends State<Login> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  "Not Registered yet?",
+                  "Have an account?",
                   style: TextStyle(color: ThemeHelper.secondary),
                 ),
                 TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const Registration()));
-                    },
+                    onPressed: () {},
                     child: Text(
-                      "Sign Up",
+                      "Sign In",
                       style: TextStyle(
                           color: ThemeHelper.primary,
                           fontWeight: FontWeight.w600),

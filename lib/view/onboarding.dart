@@ -2,8 +2,12 @@ import 'package:delayed_display/delayed_display.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:get/get.dart';
+import 'package:get/instance_manager.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:managerpro/utilities/layout.dart';
 import 'package:managerpro/utilities/theme_helper.dart';
+import 'package:managerpro/view/login.dart';
 
 class Onboarding extends StatefulWidget {
   const Onboarding({super.key});
@@ -20,6 +24,14 @@ class _OnboardingState extends State<Onboarding> {
     "Task Management"
   ];
   PageController pageController = PageController();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+
+    final box = GetStorage();
+    box.write("firstTime", 1);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -207,19 +219,25 @@ class _OnboardingState extends State<Onboarding> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       InkWell(
-                          onTap: () {},
+                          onTap: () {
+                            Get.to(const Login());
+                          },
                           child: Text(
                             "Skip",
                             style: TextStyle(fontSize: 18),
                           )),
                       IconButton(
                           onPressed: () {
-                            pageController.animateToPage(currentState,
-                                curve: Curves.easeIn,
-                                duration: const Duration(milliseconds: 200));
-                            setState(() {
-                              currentState += 1;
-                            });
+                            if (currentState == 3) {
+                              Get.to(const Login());
+                            } else {
+                              pageController.animateToPage(currentState,
+                                  curve: Curves.easeIn,
+                                  duration: const Duration(milliseconds: 200));
+                              setState(() {
+                                currentState += 1;
+                              });
+                            }
                           },
                           icon: const Icon(
                             Icons.arrow_forward,
