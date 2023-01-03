@@ -1,8 +1,17 @@
 import 'package:delayed_display/delayed_display.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get/get.dart';
+import 'package:get/instance_manager.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:managerpro/utilities/theme_helper.dart';
+import 'package:managerpro/view/avatar.dart';
+import 'package:managerpro/view/home.dart';
+import 'package:managerpro/view/login.dart';
+import 'package:managerpro/view/navigation.dart';
 import 'package:managerpro/view/onboarding.dart';
 
 class Splash extends StatefulWidget {
@@ -15,7 +24,6 @@ class Splash extends StatefulWidget {
 class _SplashState extends State<Splash> {
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     onStart();
   }
@@ -54,8 +62,23 @@ class _SplashState extends State<Splash> {
   }
 
   onStart() {
+    final box = GetStorage();
     Future.delayed(const Duration(seconds: 2), () {
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>const Onboarding()));
+      FirebaseAuth.instance.authStateChanges().listen((User? user) {
+        if (user == null && box.read("firstTime") == 1) {
+          Get.to(const Login());
+        } else if (user != null) {
+          print("ki obostha?");
+          if (box.read("oldUser") == 1) {
+            print('Welcome Back');
+            Fluttertoast.showToast(msg: "Welcome back");
+            Get.offAll(const Navigation());
+          }
+        } else {
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (context) => const Onboarding()));
+        }
+      });
     });
   }
 }

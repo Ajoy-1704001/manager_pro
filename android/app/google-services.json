@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "768314495768",
+    "project_id": "managerpro-b4dd1",
+    "storage_bucket": "managerpro-b4dd1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:768314495768:android:3bc9bb2177e4b26a02446d",
+        "android_client_info": {
+          "package_name": "com.deb.managerpro"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "768314495768-cuu22e3qgdl75rqjgdndjbeagafh31eg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBVl_p2rF5GuBCqrTh-l39hRbAcx498FUc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "768314495768-cuu22e3qgdl75rqjgdndjbeagafh31eg.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "768314495768-i7a35d8137jg79upm43kuq6klhqn847b.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.deb.managerpro"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
