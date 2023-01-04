@@ -1,187 +1,192 @@
 import 'package:flutter/material.dart';
+import 'package:get/instance_manager.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:managerpro/controller/user_controller.dart';
+import 'package:managerpro/utilities/layout.dart';
 import 'package:managerpro/utilities/theme_helper.dart';
+import 'package:managerpro/widget/custom_tile.dart';
 
-class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
+class Profile extends StatefulWidget {
+  const Profile({super.key});
 
+  @override
+  State<Profile> createState() => _ProfileState();
+}
+
+class _ProfileState extends State<Profile> {
 // String ProfileName = "Ajoy Deb Nath";
-// String ProfileMail = "u1704001@student.cuet.ac.bd";
-// String OngoingProjectNo = "5";
-// String TotalCompletedProjectNo = "25";
-// String ProfileImage = "assets/avatar/a1.png";
+  late String avatarName = "a1";
+  UserController userController = Get.find();
+  bool isLoad = false;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getData();
+  }
+
+  void getData() async {
+    await userController.getUserData().then((value) {
+      setState(() {
+        isLoad = true;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        elevation: 0.1,
+        elevation: 0,
         backgroundColor: Colors.white,
-        leading: Container(
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: ThemeHelper.ancent,
-            ),
-            borderRadius: BorderRadius.circular(100),
-          ),
-          child: IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              LineAwesomeIcons.angle_left,
-              size: 25.0,
-              color: Colors.black,
-            ),
-          ),
-        ),
+        // leading: Container(
+        //   decoration: BoxDecoration(
+        //     border: Border.all(
+        //       color: ThemeHelper.ancent,
+        //     ),
+        //     borderRadius: BorderRadius.circular(100),
+        //   ),
+        //   child: IconButton(
+        //     onPressed: () {},
+        //     icon: const Icon(
+        //       LineAwesomeIcons.angle_left,
+        //       size: 25.0,
+        //       color: Colors.black,
+        //     ),
+        //   ),
+        // ),
         title: Text(
           "Profile",
-          style: TextStyle(color: ThemeHelper.textColor, fontSize: 20),
+          style: TextStyle(
+              color: ThemeHelper.textColor, fontWeight: FontWeight.w600),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Container(
-          padding: const EdgeInsets.all(10.0),
-          child: Column(
-            children: [
-              Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage("assets/elipse.png"),
-                    fit: BoxFit.fill,
-                  ),
-                ),
-                child: Image(
-                  width: 120,
-                  height: 120,
-                  image: AssetImage("assets/avatar/a1.png"),
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                "Ajoy Deb Nath",
-                style: TextStyle(
-                  fontSize: 20.0,
-                  color: ThemeHelper.textColor,
-                ),
-              ),
-              Text(
-                "u1704001@student.cuet.ac.bd",
-                style: TextStyle(
-                  fontSize: 13.0,
-                  color: ThemeHelper.secondary,
-                ),
-              ),
-              const SizedBox(height: 15),
-              ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  side: BorderSide(
-                    color: ThemeHelper.primary,
-                  ),
-                ),
-                child: Text(
-                  "Edit",
-                  style:
-                      TextStyle(color: ThemeHelper.textColor, fontSize: 13.0),
-                ),
-              ),
-              const SizedBox(height: 10),
-              const Divider(),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: <Widget>[
-                  Container(
-                    child: Column(
-                      children: [
-                        Icon(LineAwesomeIcons.clock),
-                        const SizedBox(height: 5),
-                        Text(
-                          "5",
-                          style: TextStyle(
-                              color: ThemeHelper.textColor, fontSize: 18),
-                        ),
-                        Text(
-                          "On Going",
-                          style: TextStyle(
-                              color: ThemeHelper.secondary, fontSize: 12),
-                        ),
-                      ],
+      body: isLoad
+          ? SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: Layout.allPad),
+                child: Stack(
+                  children: [
+                    Positioned(
+                      right: 20,
+                      child: Image.asset("assets/elipse_1.png",
+                          height: MediaQuery.of(context).size.height * 0.12),
                     ),
-                  ),
-                  Container(
-                    child: Column(children: [
-                      Icon(LineAwesomeIcons.check_circle),
-                      const SizedBox(height: 5),
-                      Text(
-                        "25",
-                        style: TextStyle(
-                            color: ThemeHelper.textColor, fontSize: 20),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 20, bottom: 10),
+                      child: Column(
+                        children: [
+                          CircleAvatar(
+                            radius: 70,
+                            child: Image.asset(
+                                "assets/avatar/a${userController.avatar.value}.png"),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            userController.userName.value,
+                            maxLines: 1,
+                            overflow: TextOverflow.fade,
+                            style: const TextStyle(
+                                fontSize: 24.0, fontWeight: FontWeight.w600),
+                          ),
+                          Text(
+                            userController.email.value,
+                            style: TextStyle(
+                              fontSize: 14.0,
+                              color: ThemeHelper.secondary,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          ElevatedButton(
+                            onPressed: () {},
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              elevation: 0,
+                              side: BorderSide(
+                                color: ThemeHelper.primary,
+                              ),
+                            ),
+                            child: Text(
+                              "Edit",
+                              style: TextStyle(
+                                  color: ThemeHelper.textColor, fontSize: 13.0),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          const Divider(),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: <Widget>[
+                              Column(
+                                children: [
+                                  const Icon(LineAwesomeIcons.clock),
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    userController.onGoing.value.toString(),
+                                    style: TextStyle(
+                                        color: ThemeHelper.textColor,
+                                        fontSize: 18),
+                                  ),
+                                  Text(
+                                    "On Going",
+                                    style: TextStyle(
+                                        color: ThemeHelper.secondary,
+                                        fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                              Column(children: [
+                                const Icon(LineAwesomeIcons.check_circle),
+                                const SizedBox(height: 5),
+                                Text(
+                                  userController.totalCompleted.value.toString(),
+                                  style: TextStyle(
+                                      color: ThemeHelper.textColor,
+                                      fontSize: 20),
+                                ),
+                                Text(
+                                  "Total Completed",
+                                  style: TextStyle(
+                                      color: ThemeHelper.secondary,
+                                      fontSize: 12),
+                                ),
+                              ]),
+                            ],
+                          ),
+                          const SizedBox(height: 25),
+                          CustomListTile(
+                            title: "My Projects",
+                            onClick: () {},
+                          ),
+                          const SizedBox(height: 10),
+                          CustomListTile(
+                            title: "Join a Team",
+                            onClick: () {},
+                          ),
+                          const SizedBox(height: 10),
+                          CustomListTile(
+                            title: "Settings",
+                            onClick: () {},
+                          ),
+                          const SizedBox(height: 10),
+                          CustomListTile(
+                            title: "My Tasks",
+                            onClick: () {},
+                          ),
+                          const SizedBox(height: 10),
+                        ],
                       ),
-                      Text(
-                        "Total Completed",
-                        style: TextStyle(
-                            color: ThemeHelper.secondary, fontSize: 12),
-                      ),
-                    ]),
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 25),
-              ProfileList(
-                title: "My Projects",
-              ),
-              const SizedBox(height: 10),
-              ProfileList(
-                title: "Join a Team",
-              ),
-              const SizedBox(height: 10),
-              ProfileList(
-                title: "Settings",
-              ),
-              const SizedBox(height: 10),
-              ProfileList(
-                title: "My Tasks",
-              ),
-              const SizedBox(height: 10),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class ProfileList extends StatelessWidget {
-  const ProfileList({
-    Key? key,
-    required this.title,
-  }) : super(key: key);
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: ThemeHelper.ancent),
-        borderRadius: BorderRadius.all(Radius.circular(10)),
-      ),
-      child: ListTile(
-        title: Text(
-          title,
-          style: TextStyle(color: ThemeHelper.textColor, fontSize: 15),
-        ),
-        trailing: IconButton(
-          onPressed: () {},
-          icon: const Icon(
-            LineAwesomeIcons.angle_right,
-            size: 16.0,
-            color: Colors.black,
-          ),
-        ),
-      ),
+            )
+          : Center(
+              child: LoadingAnimationWidget.inkDrop(
+                  color: ThemeHelper.primary, size: 60),
+            ),
     );
   }
 }
