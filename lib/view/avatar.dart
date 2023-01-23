@@ -3,6 +3,7 @@ import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:get/get.dart';
 import 'package:get/instance_manager.dart';
+import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:managerpro/controller/user_controller.dart';
 import 'package:managerpro/utilities/layout.dart';
 import 'package:managerpro/utilities/theme_helper.dart';
@@ -10,7 +11,9 @@ import 'package:managerpro/view/navigation.dart';
 import 'package:managerpro/widget/large_button.dart';
 
 class Avatar extends StatefulWidget {
-  const Avatar({super.key});
+  const Avatar({super.key, this.isLeading = false, this.ci = 0});
+  final bool isLeading;
+  final int ci;
 
   @override
   State<Avatar> createState() => _AvatarState();
@@ -21,10 +24,27 @@ class _AvatarState extends State<Avatar> {
   int currentIndex = 0;
   UserController userController = Get.find();
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    currentIndex = widget.ci;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
+        leading: widget.isLeading
+            ? IconButton(
+                onPressed: () {
+                  Get.back();
+                },
+                icon: Icon(
+                  LineAwesomeIcons.angle_left,
+                  color: ThemeHelper.textColor,
+                ))
+            : null,
         title: Text(
           "Choose Avatar",
           style: TextStyle(color: ThemeHelper.textColor),
@@ -102,8 +122,14 @@ class _AvatarState extends State<Avatar> {
               ),
             ),
             LargeBtn(
-                onClick: () {
-                  userController.saveAvater("$currentIndex");
+                onClick: () async {
+                  if (widget.isLeading) {
+                    userController.tempAvatar.value = currentIndex;
+                    userController.changeAvatar.value = true;
+                    Get.back();
+                  } else {
+                    userController.saveAvater("$currentIndex");
+                  }
                 },
                 label: "Next"),
           ],

@@ -43,6 +43,9 @@ dependencies:
   loading_animation_widget: ^1.2.0+4
   get_storage: ^2.0.3
   line_awesome_flutter: 2.0.0
+  intl: ^0.17.0
+  avatar_stack: ^1.1.2
+  step_progress_indicator: ^1.0.2
   
   
   firebase_core: ^2.4.1

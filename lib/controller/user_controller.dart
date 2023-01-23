@@ -16,6 +16,10 @@ class UserController extends GetxController {
   var email = "".obs;
   var totalCompleted = 0.obs;
   var onGoing = 0.obs;
+
+  var tempAvatar = 0.obs;
+  var changeAvatar = false.obs;
+
   Future<void> createAccount(
       String email, String password, String username) async {
     try {
@@ -104,7 +108,7 @@ class UserController extends GetxController {
     if (googleUser != null) {
       List<String> providers =
           await auth.fetchSignInMethodsForEmail(googleUser.email);
-      if (providers.isNotEmpty) {
+      if (providers.contains("password")) {
         Fluttertoast.showToast(
             msg: "Already registered for that email",
             toastLength: Toast.LENGTH_LONG);
@@ -137,5 +141,37 @@ class UserController extends GetxController {
       email.value = auth.currentUser!.email!;
       userName.value = value.get('username');
     });
+  }
+
+  Future<void> passwordResetLink(String email) async {
+    List<String> providers = await auth.fetchSignInMethodsForEmail(email);
+
+    if (providers.contains("password")) {
+      await auth.sendPasswordResetEmail(email: email);
+      Fluttertoast.showToast(msg: "A reset link has been sent to your email.");
+      Get.back();
+    } else {
+      Fluttertoast.showToast(msg: "Can't find a valid user");
+    }
+  }
+
+  Future<void> updateName(String n) async {
+    userName.value = n;
+    await db
+        .collection("users")
+        .doc(auth.currentUser!.uid)
+        .update({"username": n});
+  }
+
+  Future<void> updateAvatar(int i) async {
+    avatar.value = "$i";
+    await db
+        .collection("users")
+        .doc(auth.currentUser!.uid)
+        .update({"avatar": "$i"});
+  }
+
+  Future<void> updatePassword(String password) async {
+    await auth.currentUser!.updatePassword(password);
   }
 }
