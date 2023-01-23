@@ -30,7 +30,7 @@ class _OnboardingState extends State<Onboarding> {
     // TODO: implement initState
 
     final box = GetStorage();
-    box.write("firstTime", 1);
+    // box.write("firstTime", 1);
   }
 
   @override
