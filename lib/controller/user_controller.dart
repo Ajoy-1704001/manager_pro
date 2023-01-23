@@ -13,6 +13,9 @@ class UserController extends GetxController {
   FirebaseFirestore db = FirebaseFirestore.instance;
   var avatar = "0".obs;
   var userName = "".obs;
+  var email = "".obs;
+  var totalCompleted = 0.obs;
+  var onGoing = 0.obs;
   Future<void> createAccount(
       String email, String password, String username) async {
     try {
@@ -126,5 +129,13 @@ class UserController extends GetxController {
         .doc(auth.currentUser!.uid)
         .update({"avatar": avatar.value});
     Get.offAll(const Navigation());
+  }
+
+  Future<void> getUserData() async {
+    await db.collection("users").doc(auth.currentUser!.uid).get().then((value) {
+      avatar.value = value.get('avatar');
+      email.value = auth.currentUser!.email!;
+      userName.value = value.get('username');
+    });
   }
 }

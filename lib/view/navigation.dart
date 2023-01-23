@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
+import 'package:get/get.dart';
+import 'package:managerpro/controller/user_controller.dart';
 import 'package:managerpro/utilities/theme_helper.dart';
 import 'package:managerpro/view/home.dart';
+import 'package:managerpro/view/profile.dart';
 
 class Navigation extends StatefulWidget {
   const Navigation({super.key});
@@ -17,9 +18,10 @@ class _NavigationState extends State<Navigation> {
     const Home(),
     const Home(),
     const Home(),
-    const Home()
+    const Profile()
   ];
   int currentIndex = 0;
+  UserController userController = Get.put(UserController());
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,7 +29,7 @@ class _NavigationState extends State<Navigation> {
       bottomNavigationBar:
           Stack(alignment: AlignmentDirectional.bottomStart, children: [
         BottomNavigationBar(
-          elevation: 0,
+            elevation: 0,
             type: BottomNavigationBarType.fixed,
             currentIndex: currentIndex,
             onTap: (value) {
