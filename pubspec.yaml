@@ -46,6 +46,7 @@ dependencies:
   intl: ^0.17.0
   avatar_stack: ^1.1.2
   step_progress_indicator: ^1.0.2
+  cr_calendar: ^1.0.0+1
   
   
   firebase_core: ^2.4.1

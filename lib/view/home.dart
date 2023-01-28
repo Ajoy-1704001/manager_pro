@@ -1,4 +1,5 @@
 import 'package:avatar_stack/avatar_stack.dart';
+import 'package:avatar_stack/positions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
@@ -7,10 +8,15 @@ import 'package:get/get.dart';
 import 'package:get/instance_manager.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:managerpro/controller/project_controller.dart';
 import 'package:managerpro/controller/user_controller.dart';
+import 'package:managerpro/model/project.dart';
 import 'package:managerpro/utilities/layout.dart';
 import 'package:managerpro/utilities/theme_helper.dart';
+import 'package:managerpro/view/all_projects.dart';
 import 'package:managerpro/view/login.dart';
+import 'package:managerpro/view/project_page.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
 
 class Home extends StatefulWidget {
@@ -23,7 +29,10 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   UserController userController = Get.find();
   GlobalKey<ScaffoldState> sKey = GlobalKey();
-
+  ProjectController projectController = Get.put(ProjectController());
+  List<Project> projects = [];
+  bool projectLoaded = false;
+  List<List<MemberDetails>> avatars = [];
   String getGreetings() {
     if (DateTime.now().hour > 5 && DateTime.now().hour < 12) {
       return "Good Morning!";
@@ -34,6 +43,32 @@ class _HomeState extends State<Home> {
     } else {
       return "Good Night!";
     }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getProjects();
+
+    projectController.reload.listen((p0) {
+      if (!p0) {
+        print("hello");
+        projectLoaded = false;
+        getProjects();
+      }
+    });
+  }
+
+  getProjects() async {
+    projects = await projectController.getProjects();
+    for (var element in projects) {
+      var a = await projectController.getMemberDetails(element.members);
+      avatars.add(a);
+    }
+    setState(() {
+      projectLoaded = true;
+    });
   }
 
   @override
@@ -115,7 +150,11 @@ class _HomeState extends State<Home> {
                 ),
               ),
               ListTile(
-                onTap: () {},
+                onTap: () {
+                  Get.to(const AllProjects(
+                    isLeading: true,
+                  ));
+                },
                 leading: Icon(
                   Icons.folder,
                   color: ThemeHelper.textColor,
@@ -185,7 +224,9 @@ class _HomeState extends State<Home> {
                   style: TextStyle(color: ThemeHelper.textColor, fontSize: 16),
                 ),
               ),
-              const SizedBox(height: 30,)
+              const SizedBox(
+                height: 30,
+              )
             ],
           ),
         ),
@@ -225,9 +266,7 @@ class _HomeState extends State<Home> {
                       style: const TextStyle(
                           fontSize: 28, fontWeight: FontWeight.w700),
                     ),
-                    Text(
-                        userController.userName.value.substring(
-                            0, 4)+" 😉",
+                    Text(userController.userName.value.split(' ')[0] + " 😉",
                         style: const TextStyle(
                             fontSize: 28, fontWeight: FontWeight.w700))
                   ],
@@ -239,98 +278,192 @@ class _HomeState extends State<Home> {
             height: 7,
           ),
           Padding(
-            padding: EdgeInsets.only(left: Layout.allPad),
-            child: InkWell(
-              onTap: () {},
-              child: Container(
-                width: Get.width * 0.8,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: ThemeHelper.primary),
-                child: Padding(
-                  padding: const EdgeInsets.all(25.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "E-commerce App",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 20),
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Text(
-                        "App Development",
-                        style: TextStyle(fontSize: 14, color: Colors.white),
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      Row(
-                        children: [
-                          AvatarStack(
-                              height: 40,
-                              width: Get.width * 0.3,
-                              avatars: [
-                                for (var n = 1; n < 4; n++)
-                                  AssetImage(
-                                    "assets/avatar/a$n.png",
+              padding: EdgeInsets.only(left: Layout.allPad),
+              child: projectLoaded
+                  ? projects.isEmpty
+                      ? Align(
+                          alignment: Alignment.center,
+                          child: Text("Press + to add projects"),
+                        )
+                      : SizedBox(
+                          height: 180,
+                          child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              shrinkWrap: true,
+                              itemCount: projects.length,
+                              itemBuilder: (context, index) {
+                                int p = projects[index].members.length > 3
+                                    ? 3
+                                    : projects[index].members.length;
+                                return Padding(
+                                  padding: const EdgeInsets.only(right: 10),
+                                  child: InkWell(
+                                    onTap: () {
+                                      Get.to(const ProjectPage(),
+                                          arguments: projects[index].id);
+                                    },
+                                    child: Container(
+                                      width: Get.width * 0.8,
+                                      decoration: BoxDecoration(
+                                          border: index == 0
+                                              ? null
+                                              : Border.all(
+                                                  color: ThemeHelper.ancent),
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                          color: index == 0
+                                              ? ThemeHelper.primary
+                                              : Colors.white),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(25.0),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              projects[index].title,
+                                              style: TextStyle(
+                                                  color: index == 0
+                                                      ? Colors.white
+                                                      : ThemeHelper.textColor,
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 20),
+                                            ),
+                                            const SizedBox(
+                                              height: 10,
+                                            ),
+                                            Text(
+                                              projects[index].category,
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: index == 0
+                                                    ? Colors.white
+                                                    : ThemeHelper.secondary,
+                                              ),
+                                            ),
+                                            const SizedBox(
+                                              height: 20,
+                                            ),
+                                            Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                projects[index].members.isEmpty
+                                                    ? Container(
+                                                        decoration:
+                                                            BoxDecoration(
+                                                                color: index ==
+                                                                        0
+                                                                    ? Colors
+                                                                        .white
+                                                                    : ThemeHelper
+                                                                        .ancent,
+                                                                shape: BoxShape
+                                                                    .circle),
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(4.0),
+                                                          child: Icon(
+                                                            Icons.add,
+                                                            color: ThemeHelper
+                                                                .textColor,
+                                                          ),
+                                                        ),
+                                                      )
+                                                    : AvatarStack(
+                                                        height: 40,
+                                                        width: Get.width * 0.3,
+                                                        avatars: [
+                                                            for (var n = 0;
+                                                                n < p;
+                                                                n++)
+                                                              AssetImage(
+                                                                "assets/avatar/a${int.parse(avatars[index][n].avatar) + 1}.png",
+                                                              ),
+                                                          ]),
+                                                const Spacer(),
+                                                Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    SizedBox(
+                                                      width: Get.width * 0.3,
+                                                      child: Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: [
+                                                          Text(
+                                                            "Progress",
+                                                            style: TextStyle(
+                                                                fontSize: 14,
+                                                                color: Colors
+                                                                    .white),
+                                                          ),
+                                                          Text(
+                                                            "${projects[index].taskCompleted}/${projects[index].totalTask}",
+                                                            textAlign:
+                                                                TextAlign.right,
+                                                            style: TextStyle(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                              fontSize: 14,
+                                                              color: index == 0
+                                                                  ? Colors.white
+                                                                  : ThemeHelper
+                                                                      .textColor,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    const SizedBox(
+                                                      height: 5,
+                                                    ),
+                                                    SizedBox(
+                                                      width: Get.width * 0.3,
+                                                      child:
+                                                          StepProgressIndicator(
+                                                        totalSteps: projects[
+                                                                        index]
+                                                                    .totalTask ==
+                                                                0
+                                                            ? 1
+                                                            : projects[index]
+                                                                .totalTask,
+                                                        currentStep:
+                                                            projects[index]
+                                                                .taskCompleted,
+                                                        size: 8,
+                                                        padding: 0,
+                                                        selectedColor:
+                                                            Colors.white,
+                                                        unselectedColor:
+                                                            ThemeHelper
+                                                                .textColor,
+                                                        roundedEdges:
+                                                            const Radius
+                                                                .circular(10),
+                                                      ),
+                                                    )
+                                                  ],
+                                                )
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                              ]),
-                          const Spacer(),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SizedBox(
-                                width: Get.width * 0.3,
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      "Progress",
-                                      style: TextStyle(
-                                          fontSize: 14, color: Colors.white),
-                                    ),
-                                    Text(
-                                      "10/15",
-                                      textAlign: TextAlign.right,
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 14,
-                                          color: Colors.white),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 5,
-                              ),
-                              SizedBox(
-                                width: Get.width * 0.3,
-                                child: StepProgressIndicator(
-                                  totalSteps: 15,
-                                  currentStep: 10,
-                                  size: 8,
-                                  padding: 0,
-                                  selectedColor: Colors.white,
-                                  unselectedColor: ThemeHelper.textColor,
-                                  roundedEdges: Radius.circular(10),
-                                ),
-                              )
-                            ],
-                          )
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          )
+                                );
+                              }),
+                        )
+                  : Align(
+                      alignment: Alignment.center,
+                      child: LoadingAnimationWidget.prograssiveDots(
+                          color: ThemeHelper.primary, size: 70)))
         ],
       ),
     );
