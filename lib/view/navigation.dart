@@ -5,6 +5,7 @@ import 'package:managerpro/controller/project_controller.dart';
 import 'package:managerpro/controller/user_controller.dart';
 import 'package:managerpro/utilities/layout.dart';
 import 'package:managerpro/utilities/theme_helper.dart';
+import 'package:managerpro/view/add_task.dart';
 import 'package:managerpro/view/all_projects.dart';
 import 'package:managerpro/view/create_project.dart';
 import 'package:managerpro/view/home.dart';
@@ -126,6 +127,7 @@ class _NavigationState extends State<Navigation> {
           top: 5,
           left: (MediaQuery.of(context).size.width / 2) - 25,
           child: InkWell(
+            key: const Key("main_fab"),
             onTap: () {
               Get.bottomSheet(
                 Padding(
@@ -166,25 +168,27 @@ class _NavigationState extends State<Navigation> {
                           const SizedBox(
                             height: 10,
                           ),
+                          // ListTile(
+                          //   onTap: () => Get.to(const AddTask()),
+                          //   leading: Image.asset(
+                          //     "assets/createTask.png",
+                          //     width: 25,
+                          //   ),
+                          //   title: const Text(
+                          //     "Create Task",
+                          //     style: TextStyle(
+                          //       fontWeight: FontWeight.w600,
+                          //     ),
+                          //   ),
+                          //   shape: RoundedRectangleBorder(
+                          //       borderRadius: BorderRadius.circular(15),
+                          //       side: BorderSide(color: ThemeHelper.ancent)),
+                          // ),
+                          // const SizedBox(
+                          //   height: 10,
+                          // ),
                           ListTile(
-                            leading: Image.asset(
-                              "assets/createTask.png",
-                              width: 25,
-                            ),
-                            title: const Text(
-                              "Create Task",
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15),
-                                side: BorderSide(color: ThemeHelper.ancent)),
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          ListTile(
+                            key: const Key('join_project'),
                             onTap: () {
                               Get.back();
                               Get.dialog(
@@ -214,6 +218,7 @@ class _NavigationState extends State<Navigation> {
                                                 height: 20,
                                               ),
                                               TextField(
+                                                key: const Key("code"),
                                                 controller: codeTextController,
                                               ),
                                               const SizedBox(
@@ -232,6 +237,7 @@ class _NavigationState extends State<Navigation> {
                                                     width: 10,
                                                   ),
                                                   InkWell(
+                                                    key: const Key("join"),
                                                     onTap: () async {
                                                       if (codeTextController
                                                           .value.text.isEmpty) {
@@ -251,7 +257,7 @@ class _NavigationState extends State<Navigation> {
                                                                 userController
                                                                     .userName
                                                                     .value);
-                                                          loader.remove();
+                                                        loader.remove();
                                                       }
                                                     },
                                                     child: Container(

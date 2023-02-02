@@ -5,7 +5,9 @@ import 'package:get/get.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:managerpro/controller/project_controller.dart';
+import 'package:managerpro/controller/task_controller.dart';
 import 'package:managerpro/model/project.dart';
+import 'package:managerpro/view/add_task.dart';
 import 'package:managerpro/view/project_details.dart';
 import '../utilities/theme_helper.dart';
 
@@ -16,15 +18,19 @@ class ProjectPage extends StatefulWidget {
   State<ProjectPage> createState() => _ProjectPageState();
 }
 
-class _ProjectPageState extends State<ProjectPage> {
+class _ProjectPageState extends State<ProjectPage>
+    with TickerProviderStateMixin {
   String id = Get.arguments;
   ProjectController controller = Get.find();
   late Project project;
   bool isLoaded = false;
+  TaskController taskController = Get.put(TaskController());
+  TabController? tabController;
 
   @override
   void initState() {
     super.initState();
+    tabController = TabController(length: 2, vsync: this);
     getProjectDetails();
   }
 
@@ -92,6 +98,47 @@ class _ProjectPageState extends State<ProjectPage> {
           Container(
             width: 20,
           ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
+        onPressed: () {
+          Get.to(const AddTask(), arguments: project);
+        },
+      ),
+      body: Column(
+        children: [
+          TabBar(
+              controller: tabController,
+              indicator: UnderlineTabIndicator(
+                borderSide: BorderSide(color: ThemeHelper.primary, width: 3),
+                insets: const EdgeInsets.symmetric(horizontal: 80.0),
+              ),
+              onTap: (value) => setState(() {}),
+              tabs: [
+                Tab(
+                  child: Text(
+                    "Pending Task",
+                    style: TextStyle(
+                        fontSize: 19,
+                        color:tabController!.index==0?ThemeHelper.primary: Colors.black87,
+                        fontWeight: FontWeight.w600),
+                  ),
+                ),
+                Tab(
+                  child: Text(
+                    "Completed",
+                    style: TextStyle(
+                        fontSize: 19,
+                        color: tabController!.index==1?ThemeHelper.primary: Colors.black87,
+                        fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ]),
+              
         ],
       ),
     );

@@ -11,6 +11,7 @@ import 'package:managerpro/view/navigation.dart';
 class UserController extends GetxController {
   FirebaseAuth auth = FirebaseAuth.instance;
   FirebaseFirestore db = FirebaseFirestore.instance;
+  var isLoggedIn = false.obs;
   var avatar = "0".obs;
   var userName = "".obs;
   var email = "".obs;
@@ -68,6 +69,7 @@ class UserController extends GetxController {
         userName.value = value.get("username");
         avatar.value = value.get("avatar");
       });
+      isLoggedIn.value = true;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         print('No user found for that email.');

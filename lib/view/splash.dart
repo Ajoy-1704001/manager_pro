@@ -72,7 +72,7 @@ class _SplashState extends State<Splash> {
           if (box.read("oldUser") == 1) {
             print('Welcome Back');
             Fluttertoast.showToast(msg: "Welcome back");
-            
+
             Get.offAll(const Navigation());
           }
         } else {

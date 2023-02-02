@@ -242,6 +242,7 @@ class _HomeState extends State<Home> {
           //       userController.email = "".obs;
           //       userController.totalCompleted = 0.obs;
           //       userController.onGoing = 0.obs;
+          //       userController.isLoggedIn = false;
           //       final box = GetStorage();
           //       box.write("oldUser", 0);
           //       Get.offAll(const Login());
