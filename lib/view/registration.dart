@@ -35,192 +35,197 @@ class _RegistrationState extends State<Registration> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
+        centerTitle: true,
         title: Text(
           "Sign Up",
           style: TextStyle(color: ThemeHelper.textColor),
         ),
       ),
-      body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: Layout.allPad),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Align(
-              alignment: Alignment.topRight,
-              child: Padding(
-                padding: const EdgeInsets.only(right: 10),
-                child: Image.asset(
-                  "assets/elipse.png",
-                  height: MediaQuery.of(context).size.height * 0.07,
+      body: SingleChildScrollView(
+        physics: const NeverScrollableScrollPhysics(),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: Layout.allPad),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Align(
+                alignment: Alignment.topRight,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 10),
+                  child: Image.asset(
+                    "assets/elipse.png",
+                    height: MediaQuery.of(context).size.height * 0.07,
+                  ),
                 ),
               ),
-            ),
-            DelayedDisplay(
-              delay: const Duration(milliseconds: 200),
-              slidingBeginOffset: const Offset(0.0, 0.15),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Create Account",
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
+              DelayedDisplay(
+                delay: const Duration(milliseconds: 200),
+                slidingBeginOffset: const Offset(0.0, 0.15),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Create Account",
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.7,
-                    child: Text(
-                      "Please enter your information and create your account",
-                      style: TextStyle(color: ThemeHelper.secondary),
+                    const SizedBox(
+                      height: 10,
                     ),
-                  ),
-                  SizedBox(
-                    height: Get.height * 0.03,
-                  ),
-                  Form(
-                      key: formKey,
-                      child: Column(
-                        children: [
-                          TextFormField(
-                            validator: (value) =>
-                                value == "" ? "Please enter your name" : null,
-                            onSaved: (newValue) => username = newValue!,
-                            style: const TextStyle(
-                                fontWeight: FontWeight.w600, fontSize: 18),
-                            decoration: const InputDecoration(
-                              hintText: "Enter your name",
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 30,
-                          ),
-                          TextFormField(
-                            validator: (value) =>
-                                value == "" || !(value!.contains('@'))
-                                    ? "Please enter a valid email"
-                                    : null,
-                            onSaved: (newValue) => email = newValue!.trim(),
-                            style: const TextStyle(
-                                fontWeight: FontWeight.w600, fontSize: 18),
-                            decoration: const InputDecoration(
-                              hintText: "Enter your email",
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 30,
-                          ),
-                          TextFormField(
-                            obscureText: true,
-                            validator: (value) =>
-                                value == "" ? "Please enter a password" : null,
-                            onSaved: (newValue) => password = newValue!,
-                            style: const TextStyle(
-                                fontWeight: FontWeight.w600, fontSize: 18),
-                            decoration: const InputDecoration(
-                              hintText: "Enter your password",
-                            ),
-                          )
-                        ],
-                      )),
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.03,
-                  ),
-                  LargeBtn(
-                      onClick: () async {
-                        if (formKey.currentState!.validate()) {
-                          Overlay.of(context)!.insert(loader);
-                          formKey.currentState!.save();
-                          // print(username);
-                          // print(email);
-                          // print(password);
-                          await userController.createAccount(
-                              email, password, username);
-                          loader.remove();
-                        }
-                      },
-                      label: "Sign Up"),
-                  const SizedBox(
-                    height: 25,
-                  ),
-                  Align(
-                      alignment: Alignment.center,
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.7,
                       child: Text(
-                        "Sign In With",
+                        "Please enter your information and create your account",
                         style: TextStyle(color: ThemeHelper.secondary),
-                      )),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      InkWell(
-                        onTap: () {},
-                        child: Container(
-                          width: 70,
-                          height: 70,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: ThemeHelper.ancent),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(13.0),
-                            child: Image.asset("assets/facebook.png"),
-                          ),
-                        ),
                       ),
-                      const SizedBox(
-                        width: 20,
-                      ),
-                      InkWell(
-                        onTap: () async {
-                          await userController.userLoginByGoogle();
+                    ),
+                    SizedBox(
+                      height: Get.height * 0.03,
+                    ),
+                    Form(
+                        key: formKey,
+                        child: Column(
+                          children: [
+                            TextFormField(
+                              validator: (value) =>
+                                  value == "" ? "Please enter your name" : null,
+                              onSaved: (newValue) => username = newValue!,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w600, fontSize: 18),
+                              decoration: const InputDecoration(
+                                hintText: "Enter your name",
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            TextFormField(
+                              validator: (value) =>
+                                  value == "" || !(value!.contains('@'))
+                                      ? "Please enter a valid email"
+                                      : null,
+                              onSaved: (newValue) => email = newValue!.trim(),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w600, fontSize: 18),
+                              decoration: const InputDecoration(
+                                hintText: "Enter your email",
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            TextFormField(
+                              obscureText: true,
+                              validator: (value) => value == ""
+                                  ? "Please enter a password"
+                                  : null,
+                              onSaved: (newValue) => password = newValue!,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w600, fontSize: 18),
+                              decoration: const InputDecoration(
+                                hintText: "Enter your password",
+                              ),
+                            )
+                          ],
+                        )),
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.03,
+                    ),
+                    LargeBtn(
+                        onClick: () async {
+                          if (formKey.currentState!.validate()) {
+                            Overlay.of(context)!.insert(loader);
+                            formKey.currentState!.save();
+                            // print(username);
+                            // print(email);
+                            // print(password);
+                            await userController.createAccount(
+                                email, password, username);
+                            loader.remove();
+                          }
                         },
-                        child: Container(
-                          width: 70,
-                          height: 70,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: ThemeHelper.ancent),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(13.0),
-                            child: Image.asset("assets/google.png"),
+                        label: "Sign Up"),
+                    const SizedBox(
+                      height: 25,
+                    ),
+                    Align(
+                        alignment: Alignment.center,
+                        child: Text(
+                          "Sign In With",
+                          style: TextStyle(color: ThemeHelper.secondary),
+                        )),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        InkWell(
+                          onTap: () {},
+                          child: Container(
+                            width: 70,
+                            height: 70,
+                            decoration: BoxDecoration(
+                              border: Border.all(color: ThemeHelper.ancent),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(13.0),
+                              child: Image.asset("assets/facebook.png"),
+                            ),
                           ),
                         ),
-                      )
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Have an account?",
-                        style: TextStyle(color: ThemeHelper.secondary),
-                      ),
-                      TextButton(
-                          onPressed: () {
-                            Get.to(const Login());
+                        const SizedBox(
+                          width: 20,
+                        ),
+                        InkWell(
+                          onTap: () async {
+                            await userController.userLoginByGoogle();
                           },
-                          child: Text(
-                            "Sign In",
-                            style: TextStyle(
-                                color: ThemeHelper.primary,
-                                fontWeight: FontWeight.w600),
-                          ))
-                    ],
-                  )
-                ],
-              ),
-            )
-          ],
+                          child: Container(
+                            width: 70,
+                            height: 70,
+                            decoration: BoxDecoration(
+                              border: Border.all(color: ThemeHelper.ancent),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(13.0),
+                              child: Image.asset("assets/google.png"),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Have an account?",
+                          style: TextStyle(color: ThemeHelper.secondary),
+                        ),
+                        TextButton(
+                            onPressed: () {
+                              Get.to(const Login());
+                            },
+                            child: Text(
+                              "Sign In",
+                              style: TextStyle(
+                                  color: ThemeHelper.primary,
+                                  fontWeight: FontWeight.w600),
+                            ))
+                      ],
+                    )
+                  ],
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );

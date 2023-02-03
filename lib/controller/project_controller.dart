@@ -8,11 +8,50 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:get/get_state_manager/get_state_manager.dart';
 import 'package:managerpro/model/project.dart';
+import 'package:managerpro/model/task.dart';
 
 class ProjectController extends GetxController {
   var reload = false.obs;
+  var dataFetch = false.obs;
   FirebaseFirestore db = FirebaseFirestore.instance;
   FirebaseAuth auth = FirebaseAuth.instance;
+  final projects = <Project>[].obs;
+  final avatars = <List<MemberDetails>>[].obs;
+  var isLoaded = false.obs;
+  @override
+  void onInit() {
+    super.onInit();
+    projects.bindStream(getProjects());
+  }
+
+  Stream<List<Project>> getProjects() {
+    Stream<DocumentSnapshot> stream =
+        db.collection('users').doc(auth.currentUser!.uid).snapshots();
+    stream.listen((event) async {
+      projects.clear();
+      avatars.clear();
+      dataFetch.value = false;
+      isLoaded.value = false;
+      try {
+        List<dynamic> ids = event.get('projects');
+        for (var element in ids) {
+          projects.add(Project.fromDocumentSnapshot(
+              await db.collection("projects").doc(element).get()));
+        }
+        projects.value = projects.reversed.toList();
+        for (var e in projects) {
+          avatars.add(await getMemberDetails(e.members));
+        }
+      } catch (e) {
+        isLoaded.value = true;
+      }
+      print("data fetched");
+      print(avatars.length);
+      dataFetch.value = true;
+    });
+    return projects.stream;
+  }
+
   Future<void> createProject(
       String title,
       String desc,
@@ -50,8 +89,8 @@ class ProjectController extends GetxController {
     return base64UrlEncode(values);
   }
 
-  Future<List<Project>> getProjects() async {
-    List<Project> projects = [];
+  Future<List<Project>> getAllProjects() async {
+    List<Project> all_projects = [];
     try {
       await db
           .collection("users")
@@ -64,7 +103,7 @@ class ProjectController extends GetxController {
               await db.collection("projects").doc(element).get()));
           print(element);
         }
-        projects = projects.reversed.toList();
+        all_projects = projects.reversed.toList();
       });
     } catch (e) {
       print(e);
@@ -112,5 +151,22 @@ class ProjectController extends GetxController {
           await db.collection("users").doc(element).get()));
     }
     return members;
+  }
+
+  getMyTasks() async {
+    // List<Task> tasks = [];
+    // await db.collection("users").doc(auth.currentUser!.uid).get().then((value) async {
+    //   List<dynamic> ids = value.get("tasks");
+    //   for (var element in ids) {
+    //     Task project = Task.fromDocumentSnapshot(
+    //         await db.collection("projects").doc(element).get());
+    //     for(var task in project.tasks){
+    //       if(task.assignee == auth.currentUser!.uid){
+    //         tasks.add(task);
+    //       }
+    //     }
+    //   }
+    // });
+    // return tasks;
   }
 }

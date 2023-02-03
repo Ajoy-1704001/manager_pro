@@ -283,9 +283,10 @@ class _CreateProjectState extends State<CreateProject> {
                                 start = rangeBegin!;
                                 end = rangeEnd!;
                                 print(rangeBegin.toIso8601String());
+                                print(rangeEnd.toIso8601String());
                               });
                             },
-                            padding: EdgeInsets.all(20)),
+                            padding: const EdgeInsets.all(20)),
                       );
                       if (start != null && end != null) {
                         setState(() {

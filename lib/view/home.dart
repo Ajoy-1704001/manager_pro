@@ -10,6 +10,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:managerpro/controller/project_controller.dart';
+import 'package:managerpro/controller/task_controller.dart';
 import 'package:managerpro/controller/user_controller.dart';
 import 'package:managerpro/model/project.dart';
 import 'package:managerpro/utilities/layout.dart';
@@ -30,9 +31,7 @@ class _HomeState extends State<Home> {
   UserController userController = Get.find();
   GlobalKey<ScaffoldState> sKey = GlobalKey();
   ProjectController projectController = Get.put(ProjectController());
-  List<Project> projects = [];
   bool projectLoaded = false;
-  List<List<MemberDetails>> avatars = [];
   String getGreetings() {
     if (DateTime.now().hour > 5 && DateTime.now().hour < 12) {
       return "Good Morning!";
@@ -50,25 +49,16 @@ class _HomeState extends State<Home> {
     // TODO: implement initState
     super.initState();
     getProjects();
-
-    projectController.reload.listen((p0) {
-      if (!p0) {
-        print("hello");
-        projectLoaded = false;
-        getProjects();
+    projectController.dataFetch.listen((p0) {
+      if (p0) {
+        print("loaded");
+        projectController.isLoaded.value = true;
       }
     });
   }
 
   getProjects() async {
-    projects = await projectController.getProjects();
-    for (var element in projects) {
-      var a = await projectController.getMemberDetails(element.members);
-      avatars.add(a);
-    }
-    setState(() {
-      projectLoaded = true;
-    });
+    // projects = await projectController.getProjects();
   }
 
   @override
@@ -280,8 +270,8 @@ class _HomeState extends State<Home> {
           ),
           Padding(
               padding: EdgeInsets.only(left: Layout.allPad),
-              child: projectLoaded
-                  ? projects.isEmpty
+              child: Obx(() => projectController.isLoaded.value
+                  ? projectController.projects.isEmpty
                       ? Align(
                           alignment: Alignment.center,
                           child: Text("Press + to add projects"),
@@ -291,17 +281,21 @@ class _HomeState extends State<Home> {
                           child: ListView.builder(
                               scrollDirection: Axis.horizontal,
                               shrinkWrap: true,
-                              itemCount: projects.length,
+                              itemCount: projectController.projects.length,
                               itemBuilder: (context, index) {
-                                int p = projects[index].members.length > 3
+                                int p = projectController
+                                            .projects[index].members.length >
+                                        3
                                     ? 3
-                                    : projects[index].members.length;
+                                    : projectController
+                                        .projects[index].members.length;
                                 return Padding(
                                   padding: const EdgeInsets.only(right: 10),
                                   child: InkWell(
                                     onTap: () {
                                       Get.to(const ProjectPage(),
-                                          arguments: projects[index].id);
+                                          arguments: projectController
+                                              .projects[index].id);
                                     },
                                     child: Container(
                                       width: Get.width * 0.8,
@@ -322,7 +316,8 @@ class _HomeState extends State<Home> {
                                               CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              projects[index].title,
+                                              projectController
+                                                  .projects[index].title,
                                               style: TextStyle(
                                                   color: index == 0
                                                       ? Colors.white
@@ -334,7 +329,8 @@ class _HomeState extends State<Home> {
                                               height: 10,
                                             ),
                                             Text(
-                                              projects[index].category,
+                                              projectController
+                                                  .projects[index].category,
                                               style: TextStyle(
                                                 fontSize: 14,
                                                 color: index == 0
@@ -349,7 +345,8 @@ class _HomeState extends State<Home> {
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.center,
                                               children: [
-                                                projects[index].members.isEmpty
+                                                projectController
+                                                        .avatars[index].isEmpty
                                                     ? Container(
                                                         decoration:
                                                             BoxDecoration(
@@ -380,7 +377,7 @@ class _HomeState extends State<Home> {
                                                                 n < p;
                                                                 n++)
                                                               AssetImage(
-                                                                "assets/avatar/a${int.parse(avatars[index][n].avatar) + 1}.png",
+                                                                "assets/avatar/a${int.parse(projectController.avatars[index][n].avatar) + 1}.png",
                                                               ),
                                                           ]),
                                                 const Spacer(),
@@ -403,7 +400,7 @@ class _HomeState extends State<Home> {
                                                                     .white),
                                                           ),
                                                           Text(
-                                                            "${projects[index].taskCompleted}/${projects[index].totalTask}",
+                                                            "${projectController.projects[index].taskCompleted}/${projectController.projects[index].totalTask}",
                                                             textAlign:
                                                                 TextAlign.right,
                                                             style: TextStyle(
@@ -427,15 +424,18 @@ class _HomeState extends State<Home> {
                                                       width: Get.width * 0.3,
                                                       child:
                                                           StepProgressIndicator(
-                                                        totalSteps: projects[
+                                                        totalSteps: projectController
+                                                                    .projects[
                                                                         index]
                                                                     .totalTask ==
                                                                 0
                                                             ? 1
-                                                            : projects[index]
+                                                            : projectController
+                                                                .projects[index]
                                                                 .totalTask,
                                                         currentStep:
-                                                            projects[index]
+                                                            projectController
+                                                                .projects[index]
                                                                 .taskCompleted,
                                                         size: 8,
                                                         padding: 0,
@@ -464,7 +464,141 @@ class _HomeState extends State<Home> {
                   : Align(
                       alignment: Alignment.center,
                       child: LoadingAnimationWidget.prograssiveDots(
-                          color: ThemeHelper.primary, size: 70)))
+                          color: ThemeHelper.primary, size: 70)))),
+
+          const SizedBox(
+            height: 20,
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: Layout.allPad),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "My Tasks",
+                  style: TextStyle(
+                      color: ThemeHelper.textColor,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600),
+                ),
+                IconButton(
+                    onPressed: () {},
+                    icon: Icon(
+                      Icons.keyboard_arrow_right,
+                      size: 30,
+                      color: ThemeHelper.primary,
+                    ))
+              ],
+            ),
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: Layout.allPad),
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: ThemeHelper.ancent, width: 1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Software Project",
+                            style: TextStyle(
+                              color: ThemeHelper.secondary,
+                            ),
+                          ),
+                          Text(
+                            "Requirement Analysis",
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                                color: ThemeHelper.textColor,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 17),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.red.shade200,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      width: 70,
+                      height: 25,
+                      child: Center(
+                        child: Text(
+                          "Medium",
+                          style: TextStyle(color: Colors.white, fontSize: 13),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding:
+                EdgeInsets.symmetric(horizontal: Layout.allPad, vertical: 10),
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: ThemeHelper.ancent, width: 1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Todo App",
+                            style: TextStyle(
+                              color: ThemeHelper.secondary,
+                            ),
+                          ),
+                          Text(
+                            "UI/UX design",
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                                color: ThemeHelper.textColor,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 17),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade200,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      width: 70,
+                      height: 25,
+                      child: Center(
+                        child: Text(
+                          "Low",
+                          style: TextStyle(color: Colors.white, fontSize: 13),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );

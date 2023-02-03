@@ -35,7 +35,7 @@ class Project {
         description = doc.data()!["description"],
         category = doc.data()!["category"],
         start = doc.data()!["start"],
-        end = doc.data()!["start"],
+        end = doc.data()!["end"],
         dateRange = doc.data()!["dateRange"],
         managerId = doc.data()!["managerId"],
         totalTask = doc.data()!["totalTask"],

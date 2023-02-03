@@ -49,6 +49,7 @@ class _AvatarState extends State<Avatar> {
           "Choose Avatar",
           style: TextStyle(color: ThemeHelper.textColor),
         ),
+        centerTitle: true,
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: Layout.allPad),

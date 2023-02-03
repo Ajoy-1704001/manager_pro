@@ -6,11 +6,17 @@ import 'package:managerpro/model/task.dart';
 
 class TaskController extends GetxController {
   final _tasks = <Task>[].obs;
+  final _comTasks = <Task>[].obs;
   FirebaseFirestore db = FirebaseFirestore.instance;
   FirebaseAuth auth = FirebaseAuth.instance;
   List<Task> get tasks => _tasks;
+  List<Task> get comTasks => _comTasks;
   set tasks(List<Task> value) => _tasks.value = value;
-
+  set comTasks(List<Task> value) => _comTasks.value = value;
+  String id = "";
+  var isLoaded = false.obs;
+  var dataFetched = false.obs;
+  TaskController(this.id);
   @override
   void onInit() {
     super.onInit();
@@ -18,11 +24,24 @@ class TaskController extends GetxController {
   }
 
   Stream<List<Task>> getTasks() {
+    print(id);
     Stream<QuerySnapshot> stream =
-        db.collection('projects').doc().collection("tasks").snapshots();
-
-    return stream.map((qShot) =>
-        qShot.docs.map((doc) => Task.fromDocumentSnapshot(doc)).toList());
+        db.collection('projects').doc(id).collection("tasks").snapshots();
+    stream.listen((event) {
+      dataFetched.value = false;
+      _tasks.clear();
+      _comTasks.clear();
+      for (var element in event.docs) {
+        if (element.get("status") == "pending") {
+          _tasks.add(Task.fromDocumentSnapshot(element));
+        } else {
+          _comTasks.add(Task.fromDocumentSnapshot(element));
+        }
+      }
+      dataFetched.value = true;
+      print("task got");
+    });
+    return _tasks.stream;
   }
 
   Future addTask(Task task, String? id) async {
@@ -33,4 +52,6 @@ class TaskController extends GetxController {
         .add(task.toDocumentMap())
         .then((value) => Get.back());
   }
+
+  
 }

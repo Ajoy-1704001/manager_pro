@@ -12,7 +12,7 @@ import 'package:managerpro/utilities/theme_helper.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
 
 class AllProjects extends StatefulWidget {
-  const AllProjects({super.key, this.isLeading=false});
+  const AllProjects({super.key, this.isLeading = false});
   final bool isLeading;
 
   @override
@@ -20,7 +20,6 @@ class AllProjects extends StatefulWidget {
 }
 
 class _AllProjectsState extends State<AllProjects> {
-  List<Project> projects = [];
   ProjectController projectController = Get.put(ProjectController());
   bool projectLoaded = false;
 
@@ -28,23 +27,14 @@ class _AllProjectsState extends State<AllProjects> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    getProjects();
 
-    projectController.reload.listen((p0) {
-      if (!p0) {
-        print("hello");
-        projectLoaded = false;
-        getProjects();
+    projectController.dataFetch.listen((p0) {
+      if (p0) {
+        projectController.isLoaded.value = true;
       }
     });
   }
 
-  getProjects() async {
-    projects = await projectController.getProjects();
-    setState(() {
-      projectLoaded = true;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,21 +70,24 @@ class _AllProjectsState extends State<AllProjects> {
         //       ),
         //     )),
       ),
-      body: projectLoaded
-          ? projects.isEmpty
-              ? Center(
+      body: projectController.isLoaded.value
+          ? projectController.projects.isEmpty
+              ? const Center(
                   child: Text("Press + to add projects"),
                 )
               : Padding(
                   padding: const EdgeInsets.symmetric(vertical: 20),
                   child: ListView.builder(
                       shrinkWrap: true,
-                      itemCount: projects.length,
+                      itemCount: projectController.projects.length,
                       itemBuilder: (context, index) {
-                        double progress = (projects[index].taskCompleted /
-                                (projects[index].totalTask == 0
+                        double progress = (projectController
+                                    .projects[index].taskCompleted /
+                                (projectController.projects[index].totalTask ==
+                                        0
                                     ? 1
-                                    : projects[index].totalTask)) *
+                                    : projectController
+                                        .projects[index].totalTask)) *
                             100;
                         return Padding(
                           padding: EdgeInsets.symmetric(
@@ -114,7 +107,8 @@ class _AllProjectsState extends State<AllProjects> {
                                           MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
-                                          projects[index].title,
+                                          projectController
+                                              .projects[index].title,
                                           style: TextStyle(
                                               color: ThemeHelper.textColor,
                                               fontWeight: FontWeight.w600,
@@ -133,7 +127,8 @@ class _AllProjectsState extends State<AllProjects> {
                                                         ? Colors.orange
                                                         : Colors.blue,
                                               )),
-                                          child: Align(alignment: Alignment.center,
+                                          child: Align(
+                                            alignment: Alignment.center,
                                             child: Text(
                                               "${progress.toInt()}%",
                                               style: TextStyle(
@@ -144,7 +139,8 @@ class _AllProjectsState extends State<AllProjects> {
                                       ],
                                     ),
                                     Text(
-                                      projects[index].category,
+                                      projectController
+                                          .projects[index].category,
                                       style: TextStyle(
                                         fontSize: 14,
                                         color: ThemeHelper.secondary,
@@ -159,12 +155,15 @@ class _AllProjectsState extends State<AllProjects> {
                                         SizedBox(
                                           width: Get.width * 0.6,
                                           child: StepProgressIndicator(
-                                            totalSteps:
-                                                projects[index].totalTask == 0
-                                                    ? 1
-                                                    : projects[index].totalTask,
-                                            currentStep:
-                                                projects[index].taskCompleted,
+                                            totalSteps: projectController
+                                                        .projects[index]
+                                                        .totalTask ==
+                                                    0
+                                                ? 1
+                                                : projectController
+                                                    .projects[index].totalTask,
+                                            currentStep: projectController
+                                                .projects[index].taskCompleted,
                                             size: 8,
                                             padding: 0,
                                             selectedColor: progress > 70
