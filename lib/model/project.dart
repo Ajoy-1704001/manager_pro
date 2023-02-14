@@ -47,12 +47,14 @@ class Project {
 }
 
 class MemberDetails {
+  final String id;
   final String name;
   final String avatar;
 
-  MemberDetails({required this.name, required this.avatar});
+  MemberDetails({required this.id, required this.name, required this.avatar});
 
   MemberDetails.fromDocumentSnapshot(DocumentSnapshot<Map<String, dynamic>> doc)
-      : name = doc.data()!["username"],
+      : id = doc.id,
+        name = doc.data()!["username"],
         avatar = doc.data()!["avatar"];
 }

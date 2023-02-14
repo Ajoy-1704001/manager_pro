@@ -24,8 +24,10 @@ class _AddTaskState extends State<AddTask> {
   int priority = 0;
   List<String> priorityText = ["Low", "Medium", "High"];
   Project project = Get.arguments;
-  String title = "", description = "", startDate = "", endDate = "";
-  late DateTime start, end;
+  String title = "", description = "", startDate = "", endDate = "", sDate = "";
+  late TimeOfDay start, end;
+  late DateTime date, sTime, eTime;
+  TextEditingController d = TextEditingController();
   TextEditingController d1 = TextEditingController();
   TextEditingController d2 = TextEditingController();
   late OverlayEntry loader;
@@ -120,6 +122,50 @@ class _AddTaskState extends State<AddTask> {
                 const SizedBox(
                   height: 20,
                 ),
+                Text(
+                  "Date",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: ThemeHelper.secondary,
+                  ),
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                TextFormField(
+                  controller: d,
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(
+                      LineAwesomeIcons.calendar,
+                      color: Colors.blueGrey.shade300,
+                    ),
+                    hintText: "DD/MM/YYYY",
+                  ),
+                  onSaved: (newValue) => sDate = newValue!,
+                  validator: (value) => value!.isEmpty ? "Enter Date" : null,
+                  readOnly: true,
+                  onTap: () {
+                    showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2100),
+                    ).then((value) {
+                      setState(() {
+                        date = value!;
+                        sDate = DateFormat("dd/MM/yyyy").format(date);
+                        d.text = sDate;
+                      });
+                    }).onError((error, stackTrace) {
+                      print(error);
+                      Fluttertoast.showToast(msg: "Select Date");
+                    });
+                  },
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
                 Row(
                   children: [
                     Expanded(
@@ -127,7 +173,7 @@ class _AddTaskState extends State<AddTask> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Start Date",
+                            "Start Time",
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
@@ -144,26 +190,27 @@ class _AddTaskState extends State<AddTask> {
                                 LineAwesomeIcons.calendar,
                                 color: Colors.blueGrey.shade300,
                               ),
-                              hintText: "DD/MM/YYYY",
+                              hintText: "HH:MM",
                             ),
                             onSaved: (newValue) => startDate = newValue!,
                             validator: (value) =>
                                 value!.isEmpty ? "Select Start Date" : null,
                             readOnly: true,
                             onTap: () {
-                              showDatePicker(
+                              showTimePicker(
                                 context: context,
-                                initialDate: DateTime.now(),
-                                firstDate: DateTime(2000),
-                                lastDate: DateTime(2100),
+                                initialTime: TimeOfDay.now(),
                               ).then((value) {
                                 setState(() {
                                   start = value!;
+                                  sTime = DateTime(date.year, date.month,
+                                      date.day, start.hour, start.minute);
                                   startDate =
-                                      DateFormat("dd/MM/yyyy").format(start);
+                                      DateFormat("hh:mm a").format(sTime);
                                   d1.text = startDate;
                                 });
                               }).onError((error, stackTrace) {
+                                print(error);
                                 Fluttertoast.showToast(msg: "Select Date");
                               });
                             },
@@ -179,7 +226,7 @@ class _AddTaskState extends State<AddTask> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "End Date",
+                            "End Time",
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
@@ -196,23 +243,23 @@ class _AddTaskState extends State<AddTask> {
                                 LineAwesomeIcons.calendar,
                                 color: Colors.blueGrey.shade300,
                               ),
-                              hintText: "DD/MM/YYYY",
+                              hintText: "HH:MM",
                             ),
                             onSaved: (newValue) => endDate = newValue!,
                             validator: (value) =>
                                 value!.isEmpty ? "Enter Ending Date" : null,
                             readOnly: true,
                             onTap: () {
-                              showDatePicker(
+                              showTimePicker(
                                 context: context,
-                                initialDate: DateTime.now(),
-                                firstDate: DateTime(2000),
-                                lastDate: DateTime(2100),
+                                initialTime: TimeOfDay.now(),
                               ).then((value) {
                                 setState(() {
                                   end = value!;
-                                  endDate =
-                                      DateFormat("dd/MM/yyyy").format(end);
+                                  eTime = DateTime(date.year, date.month,
+                                      date.day, end.hour, end.minute);
+                                  endDate = DateFormat("hh:mm a").format(eTime);
+
                                   d2.text = endDate;
                                 });
                               }).onError((error, stackTrace) {
@@ -280,11 +327,17 @@ class _AddTaskState extends State<AddTask> {
 
                         Overlay.of(context)!.insert(loader);
                         Task task = Task(
+                            projectId: project.id,
+                            projectName: project.title,
+                            managerId: project.managerId,
                             title: title,
                             description: description,
-                            startDate: start,
-                            endDate: end,
+                            stringDate: sDate,
+                            date: date,
+                            startDate: sTime,
+                            endDate: eTime,
                             priority: priority,
+                            review: false,
                             status: "pending");
                         await taskController.addTask(task, project.id);
                         loader.remove();

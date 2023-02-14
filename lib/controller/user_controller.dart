@@ -17,7 +17,7 @@ class UserController extends GetxController {
   var email = "".obs;
   var totalCompleted = 0.obs;
   var onGoing = 0.obs;
-
+  String? currentUserId;
   var tempAvatar = 0.obs;
   var changeAvatar = false.obs;
 

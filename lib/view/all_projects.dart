@@ -9,6 +9,7 @@ import 'package:managerpro/controller/project_controller.dart';
 import 'package:managerpro/model/project.dart';
 import 'package:managerpro/utilities/layout.dart';
 import 'package:managerpro/utilities/theme_helper.dart';
+import 'package:managerpro/view/project_page.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
 
 class AllProjects extends StatefulWidget {
@@ -34,7 +35,6 @@ class _AllProjectsState extends State<AllProjects> {
       }
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -89,100 +89,112 @@ class _AllProjectsState extends State<AllProjects> {
                                     : projectController
                                         .projects[index].totalTask)) *
                             100;
-                        return Padding(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: Layout.allPad, vertical: 10),
-                          child: InkWell(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  border: Border.all(color: ThemeHelper.ancent),
-                                  borderRadius: BorderRadius.circular(20)),
-                              child: Padding(
-                                padding: const EdgeInsets.all(20.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          projectController
-                                              .projects[index].title,
-                                          style: TextStyle(
-                                              color: ThemeHelper.textColor,
-                                              fontWeight: FontWeight.w600,
-                                              fontSize: 16),
-                                        ),
-                                        Container(
-                                          width: 60,
-                                          height: 30,
-                                          decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                              border: Border.all(
-                                                color: progress > 70
-                                                    ? Colors.green
-                                                    : progress < 30
-                                                        ? Colors.orange
-                                                        : Colors.blue,
-                                              )),
-                                          child: Align(
-                                            alignment: Alignment.center,
-                                            child: Text(
-                                              "${progress.toInt()}%",
-                                              style: TextStyle(
-                                                  color: ThemeHelper.textColor),
+                        return InkWell(
+                          onTap: () {
+                            Get.to(const ProjectPage(),
+                                arguments:
+                                    projectController.projects[index].id);
+                          },
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: Layout.allPad, vertical: 10),
+                            child: InkWell(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                    border:
+                                        Border.all(color: ThemeHelper.ancent),
+                                    borderRadius: BorderRadius.circular(20)),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(20.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            projectController
+                                                .projects[index].title,
+                                            style: TextStyle(
+                                                color: ThemeHelper.textColor,
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 16),
+                                          ),
+                                          Container(
+                                            width: 60,
+                                            height: 30,
+                                            decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                                border: Border.all(
+                                                  color: progress > 70
+                                                      ? Colors.green
+                                                      : progress < 30
+                                                          ? Colors.orange
+                                                          : Colors.blue,
+                                                )),
+                                            child: Align(
+                                              alignment: Alignment.center,
+                                              child: Text(
+                                                "${progress.toInt()}%",
+                                                style: TextStyle(
+                                                    color:
+                                                        ThemeHelper.textColor),
+                                              ),
                                             ),
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                    Text(
-                                      projectController
-                                          .projects[index].category,
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: ThemeHelper.secondary,
+                                          )
+                                        ],
                                       ),
-                                    ),
-                                    const SizedBox(
-                                      height: 5,
-                                    ),
-                                    Row(
-                                      children: [
-                                        // AvatarStack(avatars: avatars)
-                                        SizedBox(
-                                          width: Get.width * 0.6,
-                                          child: StepProgressIndicator(
-                                            totalSteps: projectController
-                                                        .projects[index]
-                                                        .totalTask ==
-                                                    0
-                                                ? 1
-                                                : projectController
-                                                    .projects[index].totalTask,
-                                            currentStep: projectController
-                                                .projects[index].taskCompleted,
-                                            size: 8,
-                                            padding: 0,
-                                            selectedColor: progress > 70
-                                                ? Colors.green
-                                                : progress < 30
-                                                    ? Colors.orange
-                                                    : Colors.blue,
-                                            unselectedColor: progress > 70
-                                                ? Colors.green.shade100
-                                                : progress < 30
-                                                    ? Colors.orange.shade100
-                                                    : Colors.blue.shade100,
-                                            roundedEdges:
-                                                const Radius.circular(10),
-                                          ),
-                                        )
-                                      ],
-                                    )
-                                  ],
+                                      Text(
+                                        projectController
+                                            .projects[index].category,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: ThemeHelper.secondary,
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        height: 5,
+                                      ),
+                                      Row(
+                                        children: [
+                                          // AvatarStack(avatars: avatars)
+                                          SizedBox(
+                                            width: Get.width * 0.6,
+                                            child: StepProgressIndicator(
+                                              totalSteps: projectController
+                                                          .projects[index]
+                                                          .totalTask ==
+                                                      0
+                                                  ? 1
+                                                  : projectController
+                                                      .projects[index]
+                                                      .totalTask,
+                                              currentStep: projectController
+                                                  .projects[index]
+                                                  .taskCompleted,
+                                              size: 8,
+                                              padding: 0,
+                                              selectedColor: progress > 70
+                                                  ? Colors.green
+                                                  : progress < 30
+                                                      ? Colors.orange
+                                                      : Colors.blue,
+                                              unselectedColor: progress > 70
+                                                  ? Colors.green.shade100
+                                                  : progress < 30
+                                                      ? Colors.orange.shade100
+                                                      : Colors.blue.shade100,
+                                              roundedEdges:
+                                                  const Radius.circular(10),
+                                            ),
+                                          )
+                                        ],
+                                      )
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),

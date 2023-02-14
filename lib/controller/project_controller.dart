@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:get/get_state_manager/get_state_manager.dart';
+import 'package:intl/intl.dart';
 import 'package:managerpro/model/project.dart';
 import 'package:managerpro/model/task.dart';
 
@@ -18,6 +19,7 @@ class ProjectController extends GetxController {
   final projects = <Project>[].obs;
   final avatars = <List<MemberDetails>>[].obs;
   var isLoaded = false.obs;
+  var assignLoaded = false.obs;
   @override
   void onInit() {
     super.onInit();
@@ -153,20 +155,31 @@ class ProjectController extends GetxController {
     return members;
   }
 
-  getMyTasks() async {
+  Stream<QuerySnapshot<Map<String, dynamic>>> getMyTasks() {
     // List<Task> tasks = [];
-    // await db.collection("users").doc(auth.currentUser!.uid).get().then((value) async {
-    //   List<dynamic> ids = value.get("tasks");
-    //   for (var element in ids) {
-    //     Task project = Task.fromDocumentSnapshot(
-    //         await db.collection("projects").doc(element).get());
-    //     for(var task in project.tasks){
-    //       if(task.assignee == auth.currentUser!.uid){
-    //         tasks.add(task);
-    //       }
-    //     }
-    //   }
-    // });
+    return db
+        .collection("users")
+        .doc(auth.currentUser!.uid)
+        .collection("tasks")
+        .snapshots();
     // return tasks;
+  }
+
+  Future<List<Task>> getTimeLine(String id, DateTime selectedDate) async {
+    List<Task> timeline = [];
+    await db
+        .collection("projects")
+        .doc(id)
+        .collection('tasks')
+        .where("stringDate",
+            isEqualTo: DateFormat("dd/MM/yyyy").format(selectedDate))
+        .get()
+        .then((value) async {
+      var dataSnapshots = value.docs;
+      for (var element in dataSnapshots) {
+        timeline.add(Task.fromQueryDocumentSnapshot(element));
+      }
+    });
+    return timeline;
   }
 }

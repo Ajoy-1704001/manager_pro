@@ -1,10 +1,12 @@
 import 'package:avatar_stack/avatar_stack.dart';
 import 'package:avatar_stack/positions.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:get/get.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:get/instance_manager.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
@@ -17,8 +19,12 @@ import 'package:managerpro/utilities/layout.dart';
 import 'package:managerpro/utilities/theme_helper.dart';
 import 'package:managerpro/view/all_projects.dart';
 import 'package:managerpro/view/login.dart';
+import 'package:managerpro/view/my_tasks.dart';
 import 'package:managerpro/view/project_page.dart';
+import 'package:managerpro/view/task_view.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
+
+import '../model/task.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -31,6 +37,8 @@ class _HomeState extends State<Home> {
   UserController userController = Get.find();
   GlobalKey<ScaffoldState> sKey = GlobalKey();
   ProjectController projectController = Get.put(ProjectController());
+  bool taskLoaded = false;
+  List<Task> tasks = [];
   bool projectLoaded = false;
   String getGreetings() {
     if (DateTime.now().hour > 5 && DateTime.now().hour < 12) {
@@ -48,17 +56,42 @@ class _HomeState extends State<Home> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    getProjects();
     projectController.dataFetch.listen((p0) {
       if (p0) {
         print("loaded");
         projectController.isLoaded.value = true;
+        getMyTask();
       }
     });
   }
 
-  getProjects() async {
-    // projects = await projectController.getProjects();
+  getMyTask() {
+    projectController.getMyTasks().listen((event) async {
+      List<String> temp = [];
+      try {
+        event.docs.forEach((element) async {
+          await FirebaseFirestore.instance
+              .collection("projects")
+              .doc(element.data()["projectId"])
+              .collection("tasks")
+              .doc(element.data()["taskId"])
+              .get()
+              .then((value) {
+            tasks.add(Task.fromDocumentSnapshot(value));
+          });
+        });
+        print("Tasks loaed");
+      } catch (e) {
+        temp = [];
+      }
+      tasks.clear();
+      print(temp.length);
+
+      print(tasks.length);
+      setState(() {
+        taskLoaded = true;
+      });
+    });
   }
 
   @override
@@ -156,19 +189,11 @@ class _HomeState extends State<Home> {
                 ),
               ),
               ListTile(
-                onTap: () {},
-                leading: Icon(
-                  Icons.timelapse,
-                  color: ThemeHelper.textColor,
-                ),
-                horizontalTitleGap: 4,
-                title: Text(
-                  "Timeline",
-                  style: TextStyle(color: ThemeHelper.textColor, fontSize: 16),
-                ),
-              ),
-              ListTile(
-                onTap: () {},
+                onTap: () {
+                  Get.to(const MyTasks(
+                    isLeading: true,
+                  ));
+                },
                 leading: Icon(
                   Icons.task,
                   color: ThemeHelper.textColor,
@@ -283,6 +308,8 @@ class _HomeState extends State<Home> {
                               shrinkWrap: true,
                               itemCount: projectController.projects.length,
                               itemBuilder: (context, index) {
+                                print(
+                                    "Task completed ${projectController.projects[index].taskCompleted}");
                                 int p = projectController
                                             .projects[index].members.length >
                                         3
@@ -492,113 +519,100 @@ class _HomeState extends State<Home> {
             ),
           ),
           const SizedBox(
-            height: 20,
+            height: 15,
           ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: Layout.allPad),
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: ThemeHelper.ancent, width: 1),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Software Project",
-                            style: TextStyle(
-                              color: ThemeHelper.secondary,
-                            ),
-                          ),
-                          Text(
-                            "Requirement Analysis",
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                                color: ThemeHelper.textColor,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 17),
-                          ),
-                        ],
+          taskLoaded
+              ? tasks.isEmpty
+                  ? Center(
+                      child: Padding(
+                      padding: const EdgeInsets.all(25.0),
+                      child: Text(
+                        "No task found",
+                        style: TextStyle(
+                            color: ThemeHelper.secondary,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w300),
                       ),
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.red.shade200,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      width: 70,
-                      height: 25,
-                      child: Center(
-                        child: Text(
-                          "Medium",
-                          style: TextStyle(color: Colors.white, fontSize: 13),
-                        ),
-                      ),
+                    ))
+                  : Expanded(
+                      child: ListView.builder(
+                          itemCount: tasks.length,
+                          shrinkWrap: true,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: Layout.allPad),
+                              child: InkWell(
+                                onTap: () {
+                                  Get.to(() => const TaskView(), arguments: [
+                                    tasks[index].id,
+                                    tasks[index].managerId,
+                                    tasks[index].projectId!,
+                                  ]);
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                        color: ThemeHelper.ancent, width: 1),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                tasks[index].projectName!,
+                                                style: TextStyle(
+                                                  color: ThemeHelper.secondary,
+                                                ),
+                                              ),
+                                              Text(
+                                                tasks[index].title!,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                    color:
+                                                        ThemeHelper.textColor,
+                                                    fontWeight: FontWeight.w600,
+                                                    fontSize: 17),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.red.shade200,
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                          ),
+                                          width: 70,
+                                          height: 25,
+                                          child: Center(
+                                            child: Text(
+                                              "Medium",
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 13),
+                                            ),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
                     )
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding:
-                EdgeInsets.symmetric(horizontal: Layout.allPad, vertical: 10),
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: ThemeHelper.ancent, width: 1),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Todo App",
-                            style: TextStyle(
-                              color: ThemeHelper.secondary,
-                            ),
-                          ),
-                          Text(
-                            "UI/UX design",
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                                color: ThemeHelper.textColor,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 17),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade200,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      width: 70,
-                      height: 25,
-                      child: Center(
-                        child: Text(
-                          "Low",
-                          style: TextStyle(color: Colors.white, fontSize: 13),
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            ),
-          ),
+              : Center(
+                  child: LoadingAnimationWidget.prograssiveDots(
+                      color: ThemeHelper.primary, size: 40),
+                )
         ],
       ),
     );

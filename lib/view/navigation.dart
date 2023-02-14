@@ -10,6 +10,7 @@ import 'package:managerpro/view/all_projects.dart';
 import 'package:managerpro/view/create_project.dart';
 import 'package:managerpro/view/home.dart';
 import 'package:managerpro/view/profile.dart';
+import 'package:managerpro/view/project_timeline.dart';
 import 'package:managerpro/widget/overlay_loader.dart';
 
 class Navigation extends StatefulWidget {
@@ -24,7 +25,7 @@ class _NavigationState extends State<Navigation> {
     const Home(),
     const AllProjects(),
     const Home(),
-    const Home(),
+    const ProjectTimeline(),
     const Profile()
   ];
   int currentIndex = 0;

@@ -14,6 +14,7 @@ class TaskController extends GetxController {
   set tasks(List<Task> value) => _tasks.value = value;
   set comTasks(List<Task> value) => _comTasks.value = value;
   String id = "";
+  final taskData = Task().obs;
   var isLoaded = false.obs;
   var dataFetched = false.obs;
   TaskController(this.id);
@@ -25,17 +26,21 @@ class TaskController extends GetxController {
 
   Stream<List<Task>> getTasks() {
     print(id);
-    Stream<QuerySnapshot> stream =
+    Stream<QuerySnapshot<Map<String, dynamic>>> stream =
         db.collection('projects').doc(id).collection("tasks").snapshots();
     stream.listen((event) {
       dataFetched.value = false;
+
       _tasks.clear();
       _comTasks.clear();
-      for (var element in event.docs) {
-        if (element.get("status") == "pending") {
-          _tasks.add(Task.fromDocumentSnapshot(element));
-        } else {
-          _comTasks.add(Task.fromDocumentSnapshot(element));
+      for (QueryDocumentSnapshot<Map<String, dynamic>> element in event.docs) {
+        List<dynamic> assignedMembers = element.get("members") ?? [];
+        if (assignedMembers.contains(auth.currentUser!.uid)) {
+          if (element.get("status") == "pending") {
+            _tasks.add(Task.fromDocumentSnapshot(element));
+          } else {
+            _comTasks.add(Task.fromDocumentSnapshot(element));
+          }
         }
       }
       dataFetched.value = true;
@@ -45,13 +50,92 @@ class TaskController extends GetxController {
   }
 
   Future addTask(Task task, String? id) async {
+    task.members = [auth.currentUser!.uid];
     await db
         .collection("projects")
         .doc(id)
         .collection("tasks")
         .add(task.toDocumentMap())
-        .then((value) => Get.back());
+        .then((value) async {
+      await db
+          .collection("projects")
+          .doc(id)
+          .update({"totalTask": FieldValue.increment(1)});
+      Get.back();
+    });
   }
 
-  
+  Future assignTask(String projectId, String taskId, List<String> ids) async {
+    await db
+        .collection("projects")
+        .doc(projectId)
+        .collection("tasks")
+        .doc(taskId)
+        .update({"members": ids}).then((value) async {
+      for (var element in ids) {
+        await db.collection("users").doc(element).collection("tasks").add({
+          "taskId": taskId,
+          "projectId": projectId,
+        });
+      }
+      Get.back();
+    });
+  }
+
+  Stream<Task> getTaskDetails(String projectId, String taskId) {
+    Stream<DocumentSnapshot<Map<String, dynamic>>> st = db
+        .collection("projects")
+        .doc(projectId)
+        .collection("tasks")
+        .doc(taskId)
+        .snapshots();
+    st.listen((event) {
+      taskData.value = Task.fromDocumentSnapshot(event);
+    });
+    return taskData.stream;
+  }
+
+  Future taskResubmit(String projectId, String taskId) async {
+    return await db
+        .collection("projects")
+        .doc(projectId)
+        .collection("tasks")
+        .doc(taskId)
+        .update({"review": false});
+  }
+
+  Future taskSubmit(String projectId, String taskId) async {
+    return await db
+        .collection("projects")
+        .doc(projectId)
+        .collection("tasks")
+        .doc(taskId)
+        .update({"review": true});
+  }
+
+  Future taskApprove(String projectId, String taskId) async {
+    return await db
+        .collection("projects")
+        .doc(projectId)
+        .collection("tasks")
+        .doc(taskId)
+        .update({"status": "completed"});
+  }
+
+  Future taskTotalInc(String projectId) async {
+    await db
+        .collection("projects")
+        .doc(id)
+        .update({"taskCompleted": FieldValue.increment(1)});
+    Get.back();
+  }
+
+  Future taskReject(String projectId, String taskId) async {
+    return await db
+        .collection("projects")
+        .doc(projectId)
+        .collection("tasks")
+        .doc(taskId)
+        .update({"review": false});
+  }
 }

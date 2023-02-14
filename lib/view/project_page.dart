@@ -13,6 +13,7 @@ import 'package:managerpro/model/task.dart';
 import 'package:managerpro/utilities/layout.dart';
 import 'package:managerpro/view/add_task.dart';
 import 'package:managerpro/view/project_details.dart';
+import 'package:managerpro/view/task_view.dart';
 import '../utilities/theme_helper.dart';
 
 class ProjectPage extends StatefulWidget {
@@ -167,86 +168,99 @@ class _ProjectPageState extends State<ProjectPage>
                                 shrinkWrap: true,
                                 itemCount: taskController.tasks.length,
                                 itemBuilder: (context, index) {
-                                  return Stack(
-                                    alignment: AlignmentDirectional.centerStart,
-                                    children: [
-                                      Card(
-                                        shape: RoundedRectangleBorder(
-                                            side: BorderSide(
-                                                color: ThemeHelper.ancent),
-                                            borderRadius:
-                                                BorderRadius.circular(10)),
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 25, vertical: 30),
-                                          child: Column(
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  Image.asset(
-                                                    "assets/code.png",
-                                                    width: 25,
-                                                    height: 25,
-                                                  ),
-                                                  const SizedBox(
-                                                    width: 10,
-                                                  ),
-                                                  Text(
-                                                    "${taskController.tasks[index].title}",
-                                                    style: TextStyle(
-                                                        fontSize: 18,
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                        color: ThemeHelper
-                                                            .primary),
-                                                  ),
-                                                ],
-                                              ),
-                                              const SizedBox(
-                                                height: 10,
-                                              ),
-                                              Text(
-                                                "${taskController.tasks[index].description}",
-                                                style: TextStyle(
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w400,
-                                                    color:
-                                                        ThemeHelper.textColor),
-                                                maxLines: 4,
-                                                textAlign: TextAlign.justify,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                              const SizedBox(
-                                                height: 6,
-                                              ),
-                                              Align(
-                                                alignment:
-                                                    Alignment.bottomRight,
-                                                child: Text(
-                                                  "${DateFormat("MMM dd").format(taskController.tasks[index].startDate) + "- " + DateFormat("MMM dd").format(taskController.tasks[index].endDate)}",
+                                  return InkWell(
+                                    onTap: () {
+                                      Get.to(const TaskView(), arguments: [
+                                        taskController.tasks[index].id,
+                                        project.managerId,
+                                        project.id
+                                      ]);
+                                    },
+                                    child: Stack(
+                                      alignment:
+                                          AlignmentDirectional.centerStart,
+                                      children: [
+                                        Card(
+                                          shape: RoundedRectangleBorder(
+                                              side: BorderSide(
+                                                  color: ThemeHelper.ancent),
+                                              borderRadius:
+                                                  BorderRadius.circular(10)),
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 25, vertical: 30),
+                                            child: Column(
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    Image.asset(
+                                                      "assets/code.png",
+                                                      width: 25,
+                                                      height: 25,
+                                                    ),
+                                                    const SizedBox(
+                                                      width: 10,
+                                                    ),
+                                                    Text(
+                                                      "${taskController.tasks[index].title}",
+                                                      style: TextStyle(
+                                                          fontSize: 18,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                          color: ThemeHelper
+                                                              .primary),
+                                                    ),
+                                                  ],
+                                                ),
+                                                const SizedBox(
+                                                  height: 10,
+                                                ),
+                                                Text(
+                                                  "${taskController.tasks[index].description}",
                                                   style: TextStyle(
                                                       fontSize: 14,
                                                       fontWeight:
-                                                          FontWeight.w500,
-                                                      color:
-                                                          ThemeHelper.primary),
+                                                          FontWeight.w400,
+                                                      color: ThemeHelper
+                                                          .textColor),
+                                                  maxLines: 4,
+                                                  textAlign: TextAlign.justify,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
                                                 ),
-                                              ),
-                                            ],
+                                                const SizedBox(
+                                                  height: 6,
+                                                ),
+                                                Align(
+                                                  alignment:
+                                                      Alignment.bottomRight,
+                                                  child: Text(
+                                                    "${DateFormat("dd MMM, ").format(taskController.tasks[index].date!) + DateFormat("hh:mm a").format(taskController.tasks[index].startDate!)} - ${DateFormat("hh:mm a").format(taskController.tasks[index].endDate!)}",
+                                                    style: TextStyle(
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                        color: ThemeHelper
+                                                            .primary),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.only(left: 3),
-                                        child: SizedBox(
-                                          height: 80,
-                                          width: 3,
-                                          child: Container(
-                                            color: ThemeHelper.primary,
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(left: 3),
+                                          child: SizedBox(
+                                            height: 80,
+                                            width: 3,
+                                            child: Container(
+                                              color: ThemeHelper.primary,
+                                            ),
                                           ),
-                                        ),
-                                      )
-                                    ],
+                                        )
+                                      ],
+                                    ),
                                   );
                                 }),
                           ),
@@ -259,86 +273,99 @@ class _ProjectPageState extends State<ProjectPage>
                                 shrinkWrap: true,
                                 itemCount: taskController.comTasks.length,
                                 itemBuilder: (context, index) {
-                                  return Stack(
-                                    alignment: AlignmentDirectional.centerStart,
-                                    children: [
-                                      Card(
-                                        shape: RoundedRectangleBorder(
-                                            side: BorderSide(
-                                                color: ThemeHelper.ancent),
-                                            borderRadius:
-                                                BorderRadius.circular(10)),
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 25, vertical: 30),
-                                          child: Column(
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  Image.asset(
-                                                    "assets/code.png",
-                                                    width: 25,
-                                                    height: 25,
-                                                  ),
-                                                  const SizedBox(
-                                                    width: 10,
-                                                  ),
-                                                  Text(
-                                                    "${taskController.comTasks[index].title}",
-                                                    style: TextStyle(
-                                                        fontSize: 18,
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                        color: ThemeHelper
-                                                            .primary),
-                                                  ),
-                                                ],
-                                              ),
-                                              const SizedBox(
-                                                height: 10,
-                                              ),
-                                              Text(
-                                                "${taskController.comTasks[index].description}",
-                                                style: TextStyle(
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w400,
-                                                    color:
-                                                        ThemeHelper.textColor),
-                                                maxLines: 4,
-                                                textAlign: TextAlign.justify,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                              const SizedBox(
-                                                height: 6,
-                                              ),
-                                              Align(
-                                                alignment:
-                                                    Alignment.bottomRight,
-                                                child: Text(
-                                                  "${DateFormat("MMM dd").format(taskController.comTasks[index].startDate) + "- " + DateFormat("MMM dd").format(taskController.comTasks[index].endDate)}",
+                                  return InkWell(
+                                    onTap: () {
+                                      Get.to(const TaskView(), arguments: [
+                                        taskController.comTasks[index].id,
+                                        project.managerId,
+                                        project.id
+                                      ]);
+                                    },
+                                    child: Stack(
+                                      alignment:
+                                          AlignmentDirectional.centerStart,
+                                      children: [
+                                        Card(
+                                          shape: RoundedRectangleBorder(
+                                              side: BorderSide(
+                                                  color: ThemeHelper.ancent),
+                                              borderRadius:
+                                                  BorderRadius.circular(10)),
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 25, vertical: 30),
+                                            child: Column(
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    Image.asset(
+                                                      "assets/code.png",
+                                                      width: 25,
+                                                      height: 25,
+                                                    ),
+                                                    const SizedBox(
+                                                      width: 10,
+                                                    ),
+                                                    Text(
+                                                      "${taskController.comTasks[index].title}",
+                                                      style: TextStyle(
+                                                          fontSize: 18,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                          color: ThemeHelper
+                                                              .primary),
+                                                    ),
+                                                  ],
+                                                ),
+                                                const SizedBox(
+                                                  height: 10,
+                                                ),
+                                                Text(
+                                                  "${taskController.comTasks[index].description}",
                                                   style: TextStyle(
                                                       fontSize: 14,
                                                       fontWeight:
-                                                          FontWeight.w500,
-                                                      color:
-                                                          ThemeHelper.primary),
+                                                          FontWeight.w400,
+                                                      color: ThemeHelper
+                                                          .textColor),
+                                                  maxLines: 4,
+                                                  textAlign: TextAlign.justify,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
                                                 ),
-                                              ),
-                                            ],
+                                                const SizedBox(
+                                                  height: 6,
+                                                ),
+                                                Align(
+                                                  alignment:
+                                                      Alignment.bottomRight,
+                                                  child: Text(
+                                                    "${DateFormat("MMM dd").format(taskController.comTasks[index].startDate!) + "- " + DateFormat("MMM dd").format(taskController.comTasks[index].endDate!)}",
+                                                    style: TextStyle(
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                        color: ThemeHelper
+                                                            .primary),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.only(left: 3),
-                                        child: SizedBox(
-                                          height: 80,
-                                          width: 3,
-                                          child: Container(
-                                            color: ThemeHelper.primary,
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(left: 3),
+                                          child: SizedBox(
+                                            height: 80,
+                                            width: 3,
+                                            child: Container(
+                                              color: ThemeHelper.primary,
+                                            ),
                                           ),
-                                        ),
-                                      )
-                                    ],
+                                        )
+                                      ],
+                                    ),
                                   );
                                 }),
                           )
